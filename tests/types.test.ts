@@ -115,27 +115,32 @@ describe('BriefingResponseSchema', () => {
 // ─── Assessment action schemas ────────────────────────────────────────────────
 
 describe('CheckActionSchema', () => {
+  const validCheck = {
+    type: 'check' as const,
+    name: 'Node.js',
+    description: 'the software this app runs on',
+    reason: 'Node.js is what this app runs on — without it, the app cannot start.',
+    command: 'node --version',
+  };
+
   it('parses a valid check action', () => {
-    expect(() =>
-      CheckActionSchema.parse({
-        type: 'check',
-        name: 'Node.js',
-        description: 'the software this app runs on',
-        command: 'node --version',
-      })
-    ).not.toThrow();
+    expect(() => CheckActionSchema.parse(validCheck)).not.toThrow();
   });
 
   it('throws on wrong type', () => {
     expect(() =>
-      CheckActionSchema.parse({ type: 'question', name: 'x', description: 'x', command: 'x' })
+      CheckActionSchema.parse({ ...validCheck, type: 'question' })
     ).toThrow();
   });
 
   it('throws on missing command', () => {
-    expect(() =>
-      CheckActionSchema.parse({ type: 'check', name: 'Node.js', description: 'x' })
-    ).toThrow();
+    const { command: _, ...noCommand } = validCheck;
+    expect(() => CheckActionSchema.parse(noCommand)).toThrow();
+  });
+
+  it('throws on missing reason', () => {
+    const { reason: _, ...noReason } = validCheck;
+    expect(() => CheckActionSchema.parse(noReason)).toThrow();
   });
 });
 
@@ -162,23 +167,35 @@ describe('QuestionActionSchema', () => {
 });
 
 describe('InstructionActionSchema', () => {
-  it('parses a valid instruction with verifyCommand', () => {
+  it('parses with installCommand and verifyCommand', () => {
     expect(() =>
       InstructionActionSchema.parse({
         type: 'instruction',
-        summary: "Node.js isn't installed",
-        steps: ['Go to nodejs.org', 'Click Download', 'Run the installer'],
-        verifyCommand: 'node --version',
+        summary: "PHP isn't installed",
+        installCommand: 'brew install php',
+        steps: ['Go to php.net', 'Download and run the installer'],
+        verifyCommand: 'php --version',
       })
     ).not.toThrow();
   });
 
-  it('parses a valid instruction without verifyCommand', () => {
+  it('parses without installCommand', () => {
     expect(() =>
       InstructionActionSchema.parse({
         type: 'instruction',
         summary: 'Create a .env file',
         steps: ['Copy .env.example to .env', 'Fill in your values'],
+      })
+    ).not.toThrow();
+  });
+
+  it('parses without verifyCommand', () => {
+    expect(() =>
+      InstructionActionSchema.parse({
+        type: 'instruction',
+        summary: "Node.js isn't installed",
+        installCommand: 'brew install node',
+        steps: ['Go to nodejs.org', 'Run the installer'],
       })
     ).not.toThrow();
   });
@@ -219,6 +236,7 @@ describe('AssessmentActionSchema', () => {
         type: 'check',
         name: 'Node.js',
         description: 'the software this app runs on',
+        reason: 'Node.js is what this app runs on — without it, the app cannot start.',
         command: 'node --version',
       })
     ).not.toThrow();

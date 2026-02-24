@@ -311,6 +311,46 @@ export async function deepSpin<T>(
   }
 }
 
+// ─── Clear spinner ────────────────────────────────────────────────────────────
+// Like spin(), but clears the line on completion instead of writing a done label.
+// Use when the caller needs to write the result line itself (e.g. with dynamic content).
+export async function spinClear<T>(label: string, taskFn: () => Promise<T>): Promise<T> {
+  let blinkOn = true;
+  let done = false;
+  const startTime = Date.now();
+
+  function elapsed() {
+    const s = Math.floor((Date.now() - startTime) / 1000);
+    return s < 60 ? `${s}s` : `${Math.floor(s / 60)}m ${s % 60}s`;
+  }
+
+  function render() {
+    process.stdout.write(`\r\x1b[2K${pulseDot(blinkOn)} ${gray(`(${label} · ${elapsed()})`)}`);
+  }
+
+  const ticker = setInterval(() => {
+    if (!done) {
+      blinkOn = !blinkOn;
+      render();
+    }
+  }, 400);
+
+  render();
+
+  try {
+    const result = await taskFn();
+    done = true;
+    clearInterval(ticker);
+    process.stdout.write('\r\x1b[2K');
+    return result;
+  } catch (err) {
+    done = true;
+    clearInterval(ticker);
+    process.stdout.write('\r\x1b[2K\n');
+    throw err;
+  }
+}
+
 // ─── Free-text input ──────────────────────────────────────────────────────────
 // Built with raw mode — not @inquirer/core.
 // Natural text area behavior - let the terminal handle cursor positioning.

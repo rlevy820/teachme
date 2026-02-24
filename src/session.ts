@@ -18,6 +18,7 @@ export function createSession({
       mode,
       projectPath,
       projectName: projectPath.split('/').pop() ?? projectPath,
+      platform: process.platform,
     },
     project: {
       structure: null,

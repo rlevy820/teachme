@@ -45,6 +45,7 @@ export const CheckActionSchema = z.object({
   type: z.literal('check'),
   name: z.string(), // technical name, e.g. "Node.js"
   description: z.string(), // plain english: what it does, e.g. "the software this app runs on"
+  reason: z.string(), // why we need this before the app can run — 1-2 sentences, non-technical
   command: z.string(), // exact command to run, e.g. "node --version"
 });
 export type CheckAction = z.infer<typeof CheckActionSchema>;
@@ -60,9 +61,10 @@ export type QuestionAction = z.infer<typeof QuestionActionSchema>;
 // instruction — something needs installing or fixing before we can continue
 export const InstructionActionSchema = z.object({
   type: z.literal('instruction'),
-  summary: z.string(), // e.g. "Node.js isn't installed"
-  steps: z.array(z.string()), // numbered plain english steps for the user to follow
-  verifyCommand: z.string().optional(), // if present: offer to re-run this after steps are done
+  summary: z.string(), // e.g. "PHP isn't installed"
+  installCommand: z.string().optional(), // if present: offer to run this to fix it automatically
+  steps: z.array(z.string()), // fallback: plain english steps for the user to follow manually
+  verifyCommand: z.string().optional(), // if present: re-run this after to confirm it worked
 });
 export type InstructionAction = z.infer<typeof InstructionActionSchema>;
 
@@ -114,6 +116,7 @@ export interface Session {
     mode: SessionMode;
     projectPath: string;
     projectName: string;
+    platform: string; // process.platform — passed to AI for OS-specific commands
   };
   project: {
     structure: string | null;
