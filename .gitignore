@@ -19,3 +19,6 @@ __pycache__/
 # Build
 dist/
 build/
+
+# Claude session memory
+memory/

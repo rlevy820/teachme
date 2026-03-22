@@ -1,4 +1,4 @@
-# Reenter — Project Briefing for Claude
+# TeachMe — Project Briefing for Claude
 
 **Authors:** Ryan Levy & Claude
 
@@ -8,333 +8,216 @@ Read this before doing anything. This is the context for every session.
 
 ## What This Is
 
-A terminal-based tool for self-taught builders who have a graveyard of old projects they can't get back into. You point it at an old project, it reads it, and guides you back in — one question at a time.
+A local web app you boot from your terminal. You `cd` into any project, run `teachme "your question"`, and a browser opens with a tutor who has read your code and teaches at your level — one exchange at a time.
+
+It's not a chatbot. It's not a documentation tool. It's a tutor that knows your project and knows how to explain things to you specifically.
 
 ---
 
 ## Who It's For
 
-Built by and for self-taught developers who:
-- Build across many domains (web, hardware, data, mobile, etc.)
-- Learn by doing, not by formal education
-- Have old projects they'd like to revive, showcase, or open source
-- Think in momentum, not whiteboards
+Built for and by a self-taught developer who:
+- Learns by building, not reading
+- Writes their own docs to reinforce understanding (the react.md approach)
+- Needs things explained from first principles, not assumed
+- Gets lost in walls of text and lecture-style responses
 
 ---
 
 ## Core Principles (never violate these)
 
-- **Deterministic flow** — every question has a purpose, every answer leads somewhere specific. No willy nilly.
-- **LLM powered** — intelligent enough to adapt to any project type, language, or structure
-- **One thing at a time** — never overwhelming, always a clear next step. Lightweight is a hard constraint, not a preference. Agents that try to do everything at once is the exact problem this tool is solving for — it would be ironic to build it that way.
-- **Plain english** — speak like a senior dev who teaches well, not a textbook. Short, clear, a bit of context/history when useful.
-- **Read before touch** — never change anything without explicit user approval
-- **Design before code** — the conversation tree and experience must be fully designed before any coding begins. Never hear a problem and immediately jump to "let's start coding." That's the failure mode this project was born from.
-- **Phase gates** — each phase has an explicit done signal before moving to the next. Don't bleed phases together. Ask the user if they're ready to move on.
-- **Build for the user first** — this was built for one specific person. Don't over-engineer, don't design for hypothetical users, don't add features that weren't asked for.
+- **Feynman first** — assume nothing. Build from first principles every time. If you can't explain it simply, the explanation isn't ready yet.
+- **One thing at a time** — never more than a few sentences before a natural pause. The user continues or asks something. Never a wall of text.
+- **Short by default** — a real conversation doesn't start with three paragraphs. Answer the question. Pause. Let them respond.
+- **Why before how** — always explain why something exists before explaining how it works.
+- **Tangents are first-class** — when the user doesn't follow an analogy or wants to go deeper on one piece, that's a tangent. The system tracks it and returns to the main thread when it resolves.
+- **Plain english** — define jargon the moment you use it. Never use one unknown term to explain another.
+- **Context-grounded** — every explanation should reference the user's actual code where possible, not generic examples.
+- **Design before code** — conversation flow and experience must be fully designed before coding begins. Never hear a problem and jump to "let's start coding."
+- **Phase gates** — each design phase has an explicit done signal. Don't bleed phases together.
 
 ---
 
-## Division of Labor
+## The Tutor Persona (derived from react.md)
 
-The user brings taste, judgment, and the call on what feels right. Claude brings knowledge of what's technically possible, what patterns exist, and what the tradeoffs are. Decisions always belong to the user. Claude presents options — never makes choices unilaterally.
+The tutor teaches exactly the way the react.md doc reads. That doc was written by Ryan to explain React to someone at his level — it's the ground truth for voice, pace, and depth.
+
+**What it does every time:**
+1. States what something is — one plain english sentence
+2. Explains why it exists — the motivation, not just the mechanism
+3. Introduces code or examples
+4. Walks through it piece by piece, naming every part
+
+**Analogy style:** always grounded in something physical or familiar. Ports as real-life ports. A spreadsheet as a database table. The "pretend version" of the webpage for the virtual DOM.
+
+**What the tutor assumes the learner has:**
+- Knows what a terminal is
+- Knows what a function is
+- Has seen HTML before
+- That's it. Nothing about CS concepts, data structures, or theory.
+
+**What the tutor never does:**
+- Define a thing using another unknown term
+- Give a complete picture when a partial picture is enough to move forward
+- Ask "does that make sense?" — it pauses at natural logic breaks and waits
 
 ---
 
-## North Star Principle
+## The Tangent System
 
-Minimality in actions towards moving to the north star. If it's worth detouring a mile to get a special gas that will make getting to the moon sweeter, consider it and talk about it. If it means traveling 100 miles and delaying the moon by a year, maybe not.
+When the user doesn't follow something in the current explanation, they can break into a tangent.
 
-When an exciting technical option comes up in a session — flag it, discuss it briefly, then park it or drop it and get back on the road. Ryan tends to explore broadly and values that creativity, but the job is to balance making something new and great with actually getting somewhere.
+**How it starts:** highlight any text in the tutor's response → a "Tangent" button appears at the end of the selection → click it → tangent card appears.
+
+**Layout:** one card, two zones. Main chat content sits at the top of the card. When a tangent opens, a tangent area expands below it within the same card — with its own "What's going on" input at the bottom. The main content doesn't move or resize. The tangent feels like a lightweight extension of the same conversation, not a separate thing. When it closes, it just collapses — no separate window disappearing, no jarring shift.
+
+**How it ends:** user types `/back` in the tangent input → tangent card disappears. Main chat picks up where it was.
+
+**Data model:** ephemeral. The tangent exchange is not persisted. If the interaction warrants a knowledge profile update (user struggled), that update happens silently — but the conversation is gone when closed.
+
+**Who controls it:** the user entirely. No auto-close, no tutor suggestions to return. User-driven start and stop.
+
+**Model selector:** visible in the header but parked for later. Not a v1 feature.
+
+**Left strip:** visual only. No functional purpose.
 
 ---
 
-## The Failure Mode to Never Repeat
+## The Tech Stack
 
-The user has been burned by AI that hears a problem and immediately jumps to action. Doing the right thing in the wrong way is still wrong. The way this tool does things matters more than what it does. When in doubt, slow down and ask.
+**Existing (keep as-is):**
+- Node.js CLI entry point
+- TypeScript strict mode, tsup build, Biome, Vitest
+- Anthropic API (Haiku for cheap reads, Sonnet for reasoning)
+- Zod for all AI response validation
+- `@inquirer/core` for any terminal UI still needed
 
----
+**New (to add):**
+- Express server — spins up locally when you run `teachme`
+- React frontend — the browser UI (Vite)
+- The web UI handles: conversation display, highlight-to-tangent, thread navigation
 
-## The Four Modes
-
-Fixed menu — never AI-derived. Always the same four options in this order:
-
-1. **Browse** — understand it like it was built yesterday. Find the conceptual path from A to Z.
-2. **Run** — see it running live on your machine. Lowest friction path to just seeing it alive again.
-3. **MVP** — find the fastest path to real users. Local to something others can actually use.
-4. **Ship** — clean it up and take it all the way. Modernize, fix issues, deploy properly.
+**Model strategy:**
+- `claude-haiku-4-5` — reading and indexing the project files
+- `claude-sonnet-4-6` — all teaching responses (this is the reasoning-heavy part)
 
 ---
 
 ## The First Moment
 
-Tool reads the project, shows a plain english summary (always starts with "This looks like..."), then asks:
+Two entry points:
 
-**What's next:**
+```
+$ teachme
+```
+Tutor opens and asks what you want to explore. Call and response from the start — the tutor leads.
 
-Fixed menu — arrow keys, four options. No free text. The answer to this shapes everything that follows.
+```
+$ teachme "how does auth work here"
+```
+Tutor answers immediately. No preamble, no orientation.
+
+Both:
+1. CLI spins up a local Express server
+2. Scans the project directory (scout layer)
+3. Opens browser to `localhost:PORT`
+4. Session begins
+
+Each session is atomic — clean start every time, like opening a new Claude Code session.
 
 ---
 
-## Voice and Tone
+## The Knowledge Profile
 
-- Senior dev who is great at teaching
-- Speaks to a fairly technical but self-taught builder
-- Plain english first, jargon only when necessary and explained
-- Short responses, one thing at a time
-- Occasional history/context tidbits when they help understanding
-- Never assumes formal CS knowledge
+Stored in `~/.config/teachme/profile.json`. Persists across all sessions. This is the only thing that carries over — individual sessions are atomic.
+
+**What it tracks (two signals only):**
+1. **Concepts seen** — what topics have come up and roughly how many times. High count means it came up a lot, probably needed repeated explanation. `{ "async/await": 3, "state": 1, "SQL joins": 2 }`
+2. **Sticking points** — concepts where the user opened a tangent or asked an immediate follow-up. That's the signal the first explanation didn't land.
+
+**How it's used:** the tutor prompt gets a short plain-english summary — not raw data. Something like: "This user has seen async/await a few times and has struggled with it. Go slower there."
+
+**This is the core iteration area.** How the knowledge profile is designed, what signals it captures, and how the tutor prompt is structured around it will be the main thing we're refining throughout development. Don't over-engineer it upfront — start minimal and iterate.
 
 ---
 
-## Technical Stack
+## Project Structure
 
-- **Runtime:** Node.js CLI tool — runs in any terminal, installable globally via npm
-- **Language:** TypeScript (strict mode) — all source in `src/`, compiled to `dist/` via tsup
-- **LLM:** Anthropic API directly (no middleware)
-- **Model strategy:** Use the right model for the job
-  - `claude-haiku-4-5` — lightweight steps: reading files, summarizing structure, cheap tasks
-  - `claude-sonnet-4-6` — reasoning heavy steps: finding the door back in, refactor proposals
-- **Interactive prompts:** `@inquirer/core` — custom components, we own every pixel
-- **Validation:** Zod — every AI response shape is validated at runtime, not assumed
-- **Build:** tsup — single ESM bundle, shebang injected automatically
-- **Linting/formatting:** Biome — one tool, zero config drift
-- **Testing:** Vitest — infrastructure in place, tests written as features complete
-- **Future:** OpenRouter for multi-model support is a north star, not a day one concern
+```
+src/
+  index.ts          — CLI entry point. Parses args, boots the server, opens browser.
+  session.ts        — session state for the current conversation
+  types.ts          — Zod schemas + TS types for all AI responses
+  prompt.ts         — terminal UI primitives (spinners, etc. — used during boot)
+
+  scout/            — reads and understands the project before anything happens
+    directory.ts    — scans folder structure
+    files.ts        — reads key files
+    analyze.ts      — Haiku builds the plain english project map
+
+  server/           — Express server (NEW)
+    index.ts        — boots the server, serves the React app
+    routes.ts       — API routes: /ask, /tangent, /continue
+
+  teach/            — teaching logic (NEW)
+    tutor.ts        — Sonnet call, builds teaching responses
+    thread.ts       — manages main thread and tangent stack
+    profile.ts      — reads/writes the knowledge profile
+
+client/             — React frontend (NEW, Vite project)
+  src/
+    App.tsx         — root component
+    components/
+      Thread.tsx    — displays the conversation thread
+      TangentOverlay.tsx — highlight-to-tangent UI
+```
+
+---
+
+## Division of Labor
+
+Ryan brings taste, judgment, and the call on what feels right. Claude brings knowledge of what's technically possible, what patterns exist, and what the tradeoffs are. Decisions always belong to Ryan. Claude presents options — never makes choices unilaterally.
 
 ---
 
 ## Meta-Commands (for dev sessions with Claude)
 
-These are commands Ryan calls during a session to trigger specific actions. Claude can suggest them but never calls them unilaterally.
-
 - `-cp` — checkpoint: stop, reflect, update CLAUDE.md with what was just decided
 - `-decide` — we've been discussing long enough, time to make a call and document it
-- `-offtrack` — we're drifting from the north star, pull back
+- `-offtrack` — we're drifting, pull back
 
-Note: slash commands are reserved by Claude Code. All Reenter meta-commands use `-` prefix.
-
-Claude should *suggest* these when it notices a checkpoint moment, a decision lingering, or drift happening — but Ryan pulls the trigger.
+Claude should suggest these when it notices a checkpoint moment, a decision lingering, or drift happening — but Ryan pulls the trigger.
 
 ---
 
-## The Meta Insight
+## Locked Design Decisions
 
-The way this project is being built mirrors how the product should feel. The conversation between Ryan and Claude — sometimes chatting, sometimes working, sometimes teaching, sometimes providing instructions — shifting modes fluidly without feeling jarring. That's exactly what Reenter should do with the user. The dev process is the design spec.
-
-Also: the graveyard of old projects is a source of pride, not shame. The user coming to Reenter isn't embarrassed — they're saying "this was cool and I want to honor it." The tool's voice should reflect that. It's archaeology, not cleanup.
-
----
-
-## The Four Modes — The Door Metaphor (Locked)
-
-Run, MVP, and Ship are **stages of the same journey**, not separate destinations. Each one includes everything before it. Browse is the only mode that stands alone.
-
-- **Browse** — stand in front of the door and understand how it works. Don't go through it. Find the thread that explains the whole thing.
-- **Run** — build the cheapest bridge to get inside and look around. Get it running locally, as-is. Accept that some features won't work. Don't touch the code, don't fake anything.
-- **MVP** — run it locally first, then continue: build a real bridge and open the door to actual users.
-- **Ship** — run it, MVP it, then rebuild the door and bridge properly. The whole thing.
-
-The menu stays Browse / Run / MVP / Ship. The pipeline is handled internally — MVP starts with Run, Ship starts with Run → MVP.
-
-**No stubbing. No mocking. No fake databases.** Guide the user through the real setup. If something won't work, tell them and move on.
-
----
-
-## Walkthrough Design (Locked)
-
-**How it works:**
-- Chat mode — text input always available, agent leads but adapts to what the user says
-- Consent before every action — always shows what it's about to do and why
-- Hybrid UI — select menus for structured choices, free text always available
-- No jargon — speak in plain english, say what things do not what they're called
-
-**The full flow:**
-1. Scout: scan silently, show "This looks like..." summary (Haiku)
-2. Menu: What's next — Browse / Run / MVP / Ship
-3. Walkthrough starts (Run as example):
-   a. **Save starting point** — git pre-flight, always first (BUILT)
-   b. **Deep scan** — read every file, feed full context to the loop (BUILT)
-   c. **Run loop** — try first, diagnose from failure (see below)
-
----
-
-## The Run Loop — Try First, Diagnose from Failure (Locked)
-
-**The principle:** A senior dev doesn't run a checklist before trying things. They just try it, read what breaks, fix that one thing, and try again. That's exactly what this loop does.
-
-**The loop:**
-1. AI looks at the project and figures out the most likely start command
-2. Shows it with consent — runs it
-3. Waits 3-4 seconds:
-   - If it crashes → error is right there, move to fix
-   - If it's still running → it started. Tell user to open the URL, come back and report.
-4. Asks: "What happened?" — free text, or pick from:
-   - It's working
-   - Something looks off → free text
-   - It failed with an error → free text / paste
-5. AI reads the report, figures out the one thing blocking it, proposes a fix
-6. Fix it, try again
-7. Repeat until working
-
-**Memory — what the AI sees on every call:**
-```
-Attempt 1: php -S localhost:8000
-Output: [stdout/stderr from the process]
-User reported: "page loads but I get a database connection error"
-
-Fix attempted: brew services start mysql
-Result: Formula not installed
-
-Attempt 2: ...
-```
-Everything tried. Everything said. Full picture every call.
-
-**Action types:**
-```
-start   — the command to try running the app
-          { type, command, reason, expectation }
-          reason = why this is the right thing to try
-          expectation = what the user should see if it works
-
-fix     — one thing blocking it
-          { type, problem, installCommand?, steps[], verifyCommand? }
-          installCommand = run it for them if possible
-          steps = fallback manual steps
-
-ask     — something only the user knows
-          { type, text, options? }
-
-done    — it's working
-          { type, url?, notes[] }
-          url = where to open it (if applicable)
-          notes = soft blockers still present — specific, never generic
-```
-
-**After a `start` — the "what happened" moment:**
-Run the command. Wait 3-4 seconds. Then ask:
-```
-  What happened?
-  ❯ It's working
-    Something looks off
-    It failed with an error
-    [type what you saw]
-```
-Whatever the user types goes straight to the AI on the next call.
-
-**For persistent servers** (php -S, npm start, flask run, etc.):
-- Spawn in subprocess, wait 3-4s for crash or stability
-- If stable: show URL, wait for user to check browser and report back
-- If crashed: error is right there, move to fix
-- Keep process alive while waiting for report
-- Kill it when they respond (whether working or not — they'll restart it themselves)
-
-**Key principle:** Work from the simplest solution. It's OK and expected that the first attempt fails — that failure IS the diagnosis. Never try to predict what's missing upfront.
-
-**Build tasks (in order):**
-1. **Redesign types** — replace old action schemas with `start`, `fix`, `ask`, `done`
-2. **New assess.ts** — Sonnet call, new action types, full attempt history as context
-3. **Start runner** — runs the command, waits 3-4s, handles crash vs stable
-4. **"What happened" prompt** — free text + presets, feeds answer back to loop
-5. **Fix presenter** — same pattern as old instruction (install command or manual steps)
-6. **Ask presenter** — same as old question presenter (already built, minor updates)
-7. **Loop orchestrator** — new loop.ts wiring all the above
-8. **Wire into index.ts**
-
-**Git pre-flight (locked):**
-- Always runs first, always shows "Saving your starting point" spinner
-- No git → `git init` + commit everything (creates `.gitignore` if missing)
-- Loose ends → silently commit everything
-- Already clean → empty commit (`--allow-empty`)
-- Commit message: `"saving starting point before reenter [NN]"` — indexed, increments each run
-- No branch created — the commit IS the restore point
-- Only treats git as project's own if repo root === project path (parent repos ignored)
-- Applies to Run, MVP, and Ship — not Browse
-
-**Key principle:** The tool does the technical thinking. The user makes the human decision. Specific always, generic never. Honest always.
-
----
-
-## Project Structure (locked)
-
-```
-src/
-  index.ts          — entry point only, wires everything together
-  session.ts        — the spine, holds all state for the entire session
-  prompt.ts         — all custom terminal UI lives here
-  types.ts          — Zod schemas + TypeScript types for all AI responses and session state
-
-  scout/            — understands the project before anything happens
-    directory.ts    — scans folder structure
-    files.ts        — reads key files (package.json, README, etc.)
-    analyze.ts      — Haiku builds the full high level map
-
-  briefing/         — parked. orientation moment lives here (interview.ts), not yet wired in
-    interview.ts    — generates one plain english sentence before step 1 (Sonnet)
-
-  walkthrough/      — guided step-by-step execution
-    git.ts          — save starting point before anything changes (BUILT)
-    steps.ts        — manages step progression and state (stub)
-    check.ts        — runs commands, captures output, reports back (stub)
-    respond.ts      — handles what the user says at each step (stub)
-```
-
-**Why this structure:** Each folder has one job. Named after what they mean in the product, not what they do technically. Scout, Briefing, Walkthrough — anyone can navigate this at 2am.
-
----
-
-## The Execution Pattern (locked)
-
-```
-AI proposes the next thing to try — explains why in plain english
-↓
-User consents (or skips)
-↓
-Command runs — output captured or streamed live
-↓
-"What happened?" — user reports in their own words (free text always available)
-↓
-AI reads the real output + user report — responds to what actually happened
-↓
-Next action. Repeat.
-```
-
-Never predicts. Never checklists. Always runs something real and reads what breaks.
-
----
-
-## Known Issues / Polish Later
-
-- API key setup flow not built yet — right now the key lives in Reenter's own `.env`. Future: first-run setup asks the user for their key and stores it in `~/.config/reenter/`.
+- **Teaching loop** — AI-decided pacing with hard guardrails: max 4 sentences of prose before a pause or code block, one concept per response. AI picks the natural break point within those constraints.
+- **80/20 on AI** — use AI where intelligence genuinely moves the needle (teaching responses, reading the codebase, knowing what concept to introduce next). Deterministic logic for everything else (routing, thread tracking, session state, UI).
+- **First moment** — tutor answers immediately. No orientation beat, no "here's what I found." The project context is silent — the tutor just knows it.
+- **Sessions** — atomic. Each session is a clean start, like opening a new Claude Code session. No saving, no resuming.
+- **Tangent system** — see The Tangent System section above. User-controlled, ephemeral, side panel layout.
+- **Knowledge profile** — two signals: concepts seen (frequency) and sticking points (tangents/follow-ups). Fed to tutor as a short plain-english summary. Core iteration area throughout development.
 
 ---
 
 ## Where We Are
 
-- [x] Problem defined
+- [x] Project rescoped from Reenter to TeachMe
 - [x] Core principles defined
-- [x] Four modes defined — Browse / Run / MVP / Ship (fixed menu, locked copy)
-- [x] First moment designed — summary always starts "This looks like...", prompt is "What's next:"
-- [x] Voice and tone defined
-- [x] README written
-- [x] Git initialized
-- [x] Project structure and DevOps foundation set up
-- [x] Technical stack decided
-- [x] Scout phase — scan + summary
-- [x] Custom terminal UI (prompt.ts) — spinners, select, free text, all prompt primitives
-- [x] TypeScript migration — strict mode, Zod validation, tsup build, Biome, Vitest
-- [x] CI/CD — GitHub Actions, build + lint + tests on push/PR
-- [x] Git pre-flight — "Saving your starting point" (BUILT, locked)
-- [x] Deep scan — reads every file, feeds full context to the loop (BUILT)
-- [x] Run loop design — try first, diagnose from failure (DESIGNED, locked)
-- [ ] Run loop build — new action types, start runner, fix presenter, orchestrator — **this is next**
-- [ ] MVP and Ship stages
-- [ ] Browse mode
-- [ ] First-run API key setup flow
-- [ ] Global install (`reenter` from anywhere)
-
----
-
-## Next Step
-
-Build the run loop. Start with redesigning the types (`start`, `fix`, `ask`, `done`), then build outward from there. Old files to gut/replace: `assess.ts`, `check.ts`, `instruct.ts`, `question.ts`, `loop.ts`. The old versions were a checklist-based design — replaced by try-first.
+- [x] Tutor persona defined (from react.md)
+- [x] Tangent mechanic designed and locked — inline expand within single card, user-controlled, ephemeral
+- [x] UI layout locked — single card, markdown rendering, "What's going on" input, minimal chrome
+- [x] Two entry points locked — `teachme` (tutor prompts) and `teachme "question"` (answers immediately)
+- [x] Tech stack decided
+- [x] Project structure sketched
+- [x] Scout layer built (reused from Reenter)
+- [x] Terminal UI primitives built (prompt.ts, reused from Reenter)
+- [x] Build setup, CI/CD, linting (reused from Reenter)
+- [x] All design questions answered and locked
+- [ ] Server layer (Express + routes) — **next**
+- [ ] Teaching loop (tutor.ts, thread.ts)
+- [ ] React client (conversation UI, tangent expand)
+- [ ] Knowledge profile (storage + read/write)
+- [ ] CLI entry point updated
+- [ ] Global install (`teachme` from anywhere)

@@ -1,4 +1,4 @@
-// Custom terminal UI for Reenter.
+// Custom terminal UI for TeachMe.
 // Built on @inquirer/core so we own every pixel of the UI.
 // Shows just the title when an option is not focused.
 // Shows title + dim inline description only when focused.
@@ -77,12 +77,12 @@ interface SelectChoice {
   description?: string;
 }
 
-interface ReenterSelectConfig {
+interface TmSelectConfig {
   message: string;
   choices: SelectChoice[];
 }
 
-const reenterSelect = createPrompt<string, ReenterSelectConfig>((config, done) => {
+const tmSelect = createPrompt<string, TmSelectConfig>((config, done) => {
   const { message, choices } = config;
   const [status, setStatus] = useState('idle');
   const [active, setActive] = useState(0);
@@ -122,7 +122,7 @@ const reenterSelect = createPrompt<string, ReenterSelectConfig>((config, done) =
   return `\x1b[94m●\x1b[0m ${bold(message)}\n${page}${cursorHide}`;
 });
 
-export default reenterSelect;
+export default tmSelect;
 
 // ─── Thinking indicator ───────────────────────────────────────────────────────
 // Renders a pulsing ● — alternates between white and gray so the dot breathes.
@@ -354,7 +354,7 @@ export async function spinClear<T>(label: string, taskFn: () => Promise<T>): Pro
 // ─── Free-text input ──────────────────────────────────────────────────────────
 // Built with raw mode — not @inquirer/core.
 // Natural text area behavior - let the terminal handle cursor positioning.
-export function reenterInput({ message }: { message: string }): Promise<string> {
+export function tmInput({ message }: { message: string }): Promise<string> {
   return new Promise((resolve) => {
     const width = process.stdout.columns || 80;
     const bar = `\x1b[90m${'─'.repeat(width)}\x1b[0m`;
@@ -396,7 +396,7 @@ export function reenterInput({ message }: { message: string }): Promise<string> 
           process.stdout.write('\x1b[A');
         }
       }
-      process.stdout.write(`\r${green('●')} ${message}  ${cyan(value)}\n`);
+      process.stdout.write(`\r${green('●')} ${cyan(value)}\n`);
       resolve(value.trim());
     }
 
@@ -409,6 +409,7 @@ export function reenterInput({ message }: { message: string }): Promise<string> 
 
     process.stdin.on('data', (key: string) => {
       if (key === '\r' || key === '\n') {
+        if (value.trim().length === 0) return;
         process.stdout.write(`\n${bar}\n`);
         finish();
       } else if (key === '\x7f') {

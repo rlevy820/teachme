@@ -8,14 +8,14 @@ import { deepReadFiles, readKeyFiles } from '../../src/scout/files.js';
 const ROOT = fileURLToPath(new URL('../../', import.meta.url));
 
 describe('readKeyFiles', () => {
-  it('finds package.json in the Reenter project', () => {
+  it('finds package.json in the TeachMe project', () => {
     const result = readKeyFiles(ROOT);
     expect(result).toContain('--- package.json ---');
   });
 
   it('includes the file content after the header', () => {
     const result = readKeyFiles(ROOT);
-    expect(result).toContain('"name": "reenter"');
+    expect(result).toContain('"name": "teachme"');
   });
 
   it('returns empty string for a directory with no key files', () => {
@@ -54,7 +54,7 @@ describe('readKeyFiles', () => {
 let tmpDir: string;
 
 beforeEach(() => {
-  tmpDir = path.join(tmpdir(), `reenter-test-${Date.now()}`);
+  tmpDir = path.join(tmpdir(), `tm-test-${Date.now()}`);
   mkdirSync(tmpDir, { recursive: true });
 });
 

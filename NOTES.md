@@ -1,4 +1,4 @@
-# Reenter — Ryan's Notes
+# TeachMe — Ryan's Notes
 
 This file is just for me. Plain english explanations of why each file exists and what it does. Not a doc for others, not read by Claude. Just future-me understanding past-me.
 
@@ -18,7 +18,7 @@ The briefing doc for Claude. Every time a new Claude Code session starts, Claude
 
 ## README.md
 
-The public-facing explanation of what Reenter is. This is what someone sees when they land on the GitHub repo. Written for anyone, not just me.
+The public-facing explanation of what TeachMe is. This is what someone sees when they land on the GitHub repo. Written for anyone, not just me.
 
 ---
 

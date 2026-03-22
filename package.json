@@ -1,11 +1,11 @@
 {
-  "name": "reenter",
+  "name": "teachme",
   "version": "0.1.0",
-  "description": "A terminal-based tool that helps you re-engage with old projects. Like having a senior dev sit next to you, read through your old code, and get you moving again — without touching anything you didn't approve.",
+  "description": "A local tutor that reads your code and teaches you about it — one exchange at a time.",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
-    "reenter": "dist/index.js"
+    "teachme": "dist/index.js"
   },
   "scripts": {
     "build": "tsup",
@@ -19,15 +19,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/rlevy820/Reenter.git"
+    "url": "git+https://github.com/rlevy820/teachme.git"
   },
   "keywords": [],
   "author": "Ryan Levy",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/rlevy820/Reenter/issues"
+    "url": "https://github.com/rlevy820/teachme/issues"
   },
-  "homepage": "https://github.com/rlevy820/Reenter#readme",
+  "homepage": "https://github.com/rlevy820/teachme#readme",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.78.0",
     "@inquirer/ansi": "^2.0.3",

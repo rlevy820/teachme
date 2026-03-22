@@ -1,37 +1,40 @@
-# Reenter
+# teachme
 
-A terminal-based tool that helps you re-engage with old projects. Like having a senior dev sit next to you, read through your old code, and get you moving again — without touching anything you didn't approve.
+A local tutor that reads your code and teaches you about it — one exchange at a time.
 
 ---
 
 ## The Problem
 
-You build something cool. You understand it completely while you're in it. You put it down. Years later you open it and have no idea what's going on — not because you're not capable, but because the momentum is gone.
+You're building something real. You hit a concept you don't fully understand — async, state, how a database actually connects to a backend. You search for answers and get walls of text, tutorials written for someone else, or explanations that assume things you don't know yet.
+
+What you actually want is a senior dev sitting next to you who has read your specific code and can explain exactly what's happening in plain english.
 
 ---
 
 ## What It Does
 
-Point Reenter at an old project. It reads it, tells you in plain english what it is and what it runs on, then asks you one question:
+Point TeachMe at any project. Ask it anything. It reads your code first, then teaches you — not from a textbook, but from what's actually in front of you.
 
-**What do you want to do with it?**
+```
+$ cd my-project
+$ teachme "how does the auth flow work here"
+```
 
-Your answer shapes everything that follows.
-
----
-
-## Three Modes
-
-1. **Just run it** — what would it take to get this running locally right now
-2. **Get back in** — reconstruct enough context to start developing again
-3. **Refactor and clean it up** — restructure for readability and future building, without changing what it does
+A browser opens. The tutor answers — short, plain english, one thing at a time. You ask follow-ups. If you don't follow an analogy, highlight it and dig in. When you're done with that tangent, type `/back` and you're where you left off.
 
 ---
 
-## Core Principles
+## How It Teaches
 
-- **Deterministic flow** — every question has a purpose, every answer leads somewhere specific
-- **LLM powered** — intelligent enough to read any project type, any language, any structure
-- **One thing at a time** — never overwhelming, always a clear next step
-- **Plain english** — speaks to a technical but self-taught builder, not a computer science textbook
-- **Read before touch** — never changes anything without explicit approval
+- Assumes nothing — builds from first principles every time
+- Why before how — explains why something exists before explaining how it works
+- One concept at a time — never a wall of text, always a clear next beat
+- Grounded in your code — every explanation references what's actually in your project
+- Gets better over time — remembers what concepts you've struggled with across sessions
+
+---
+
+## Status
+
+In development. Not yet installable.
