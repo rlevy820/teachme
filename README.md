@@ -43,3 +43,7 @@ teachme keeps track of what concepts have given you trouble across sessions. Ove
 ## Status
 
 In development. Not yet installable.
+
+## TODO/IDEAS
+- running just `teachme` has the llm act as a tourguide through the whole codebase. if you were to sit down with the creator of a whole codebase for a bunch of hours, they could in one linear fashion, walk you through the codebase and all the important parts no matter what knowledge level you're at. this is what i want the default state to be
+- running `teachme "question"` is the non default and non main way its used. the way that the default mode teaches will be so good, that itll be a better general question answerre than other tools like claude and chat.
